@@ -1,42 +1,41 @@
+import { envVars } from "../../config/env";
 import AppError from "../../errorHelpers/AppError";
-import { IUser } from "../user/user.interface"
+import { generateToken } from "../../utils/jwt";
+import { IUser } from "../user/user.interface";
 import { User } from "../user/user.model";
-import bcryptjs from "bcryptjs"
+import bcryptjs from "bcryptjs";
 import httpStatus from "http-status-codes";
-import jwt from "jsonwebtoken"
 
 
-const credentialsLogin = async (payload: Partial<IUser>) =>{
+const credentialsLogin = async (payload: Partial<IUser>) => {
+  const { email, password } = payload;
+  const isUserExist = await User.findOne({ email });
 
- const { email, password } = payload;
-    const isUserExist = await User.findOne({ email });
+  if (!isUserExist) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Email does not exist");
+  }
+  const isPasswordMatched = await bcryptjs.compare(
+    password as string,
+    isUserExist.password as string
+  );
 
-    if (!isUserExist) {
-      throw new AppError(httpStatus.BAD_REQUEST, "Email does not exist");
-    }
-    const isPasswordMatched = await bcryptjs.compare(password as string, isUserExist.password as string);
+  if (!isPasswordMatched) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Incorrect password");
+  }
 
-    if(!isPasswordMatched){
-        throw new AppError(httpStatus.BAD_REQUEST, "Incorrect password")
-    }
-
-    const jwtPayload = {
+  const jwtPayload = {
     userId: isUserExist._id,
-    email:isUserExist.email,
-    role:isUserExist.role
-}
+    email: isUserExist.email,
+    role: isUserExist.role,
+  };
 
-const accessToken = jwt.sign(jwtPayload, "secret",{
-    expiresIn: "1d"
-})
+  const accessToken = generateToken(jwtPayload,envVars.JWT_ACCESS_SECRET,envVars.JWT_ACCESS_EXPIRE)
 
-   
-    return {
-        accessToken
-    }
- 
-}
+  return {
+    accessToken,
+  };
+};
 
 export const AuthServices = {
-    credentialsLogin,
-}
+  credentialsLogin,
+};

@@ -135,9 +135,6 @@ const updateTour = async (id: string, payload: Partial<ITour>) => {
     }
 
 
-    // const updatedTourType = await TourType.findByIdAndUpdate(id, payload, { new: true });
-    // return updatedTourType;
-
 
     // if (payload.title) {
     //     const baseSlug = payload.title.toLowerCase().split(" ").join("-")

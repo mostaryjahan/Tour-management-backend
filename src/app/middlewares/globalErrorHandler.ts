@@ -8,16 +8,28 @@ import { handleValidationError } from "../helpers/handleValidationError";
 import { handleCastError } from "../helpers/handleCastError";
 import { handleDuplicateError } from "../helpers/handleDuplicateError";
 import { TErrorSources } from "../interfaces/error.types";
+import { deleteImageFromCloudinary } from "../config/cloudinary.config";
 
-export const globalErrorHandler = (
+export const globalErrorHandler = async (
   err: any,
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  if(envVars.NODE_ENV==="development"){
+  if (envVars.NODE_ENV === "development") {
     console.log(err);
   }
+
+  if (req.file) {
+        await deleteImageFromCloudinary(req.file.path)
+    }
+
+    if (req.files && Array.isArray(req.files) && req.files.length) {
+        const imageUrls = (req.files as Express.Multer.File[]).map(file => file.path)
+
+        await Promise.all(imageUrls.map(url => deleteImageFromCloudinary(url)))
+    }
+
   let errorSources: TErrorSources[] = [];
   let statusCode = 500;
   let message = "Something Went Wrong!!";
@@ -46,7 +58,7 @@ export const globalErrorHandler = (
   else if (err.name === "ValidationError") {
     const simplifiedError = handleValidationError(err);
     statusCode = simplifiedError.statusCode;
-    errorSources = simplifiedError.errorSources  as TErrorSources[];
+    errorSources = simplifiedError.errorSources as TErrorSources[];
     message = simplifiedError.message;
   } else if (err instanceof AppError) {
     statusCode = err.statusCode;
@@ -60,7 +72,7 @@ export const globalErrorHandler = (
     success: false,
     message: message,
     errorSources,
-    err:envVars.NODE_ENV === "development" ? err : null,
+    err: envVars.NODE_ENV === "development" ? err : null,
     stack: envVars.NODE_ENV === "development" ? err.stack : null,
   });
 };

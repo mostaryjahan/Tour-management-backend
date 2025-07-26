@@ -24,7 +24,7 @@ const createUser = async (payload: Partial<IUser>) => {
 
   const authProvider: IAuthProvider = {
     provider: "credentials",
-    providerId: email!,
+    providerId:  email as string,
   };
 
   const user = await User.create({
@@ -92,8 +92,28 @@ const getAllUser = async () => {
   };
 };
 
+
+// get single user
+const getSingleUser = async (id: string) => {
+    const user = await User.findById(id).select("-password");
+    return {
+        data: user
+    }
+};
+
+
+// get me
+const getMe = async (userId: string) => {
+    const user = await User.findById(userId).select("-password");
+    return {
+        data: user
+    }
+};
+
 export const UserServices = {
   createUser,
   getAllUser,
   updateUser,
+  getMe,
+  getSingleUser
 };

@@ -1,12 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status-codes";
 import { UserServices } from "./user.service";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
-import { verifyToken } from "../../utils/jwt";
-import { envVars } from "../../config/env";
 import { JwtPayload } from "jsonwebtoken";
 // import AppError from "../../errorHelpers/AppError";
 
@@ -36,10 +34,12 @@ const updateUser = catchAsync(
     // ) as JwtPayload;
     const verifiedToken = req.user;
 
-
     const payload = req.body;
-
-    const user = await UserServices.updateUser(userId, payload, verifiedToken);
+    const user = await UserServices.updateUser(
+      userId,
+      payload,
+      verifiedToken as JwtPayload
+    );
 
     sendResponse(res, {
       success: true,
@@ -64,9 +64,40 @@ const getAllUser = catchAsync(
   }
 );
 
+// get all users
+const getMe = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const decodedToken = req.user as JwtPayload;
+    const result = await UserServices.getMe(decodedToken.userId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: " User Retrieved Successfully",
+      data: result.data,
+    });
+  }
+);
+
+// get single user
+const getSingleUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const result = await UserServices.getSingleUser(id);
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "User Retrieved Successfully",
+      data: result.data,
+    });
+  }
+);
+
 //
 export const UserController = {
   createUser,
   getAllUser,
   updateUser,
+  getMe,
+  getSingleUser,
 };

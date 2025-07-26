@@ -29,19 +29,20 @@ import passport from "passport";
 
 const credentialsLogin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    passport.authenticate("local", async (err: any, user: any, info: any) => {
 
-      if (err) {
-        return next(new AppError(401, err))
-      }
     
-      if(!user){
-       return next(new AppError(401, info.message))
+    passport.authenticate("local", async (err: any, user: any, info: any) => {
+      if (err) {
+        return next(new AppError(401, err));
       }
 
-      const userTokens= await createUserTokens(user)
+      if (!user) {
+        return next(new AppError(401, info.message));
+      }
 
- const { password: pass, ...rest } = user.toObject();
+      const userTokens = createUserTokens(user);
+
+      const { password: pass, ...rest } = user.toObject();
 
       setAuthCookie(res, userTokens);
 
@@ -52,7 +53,7 @@ const credentialsLogin = catchAsync(
         data: {
           accessToken: userTokens.accessToken,
           refreshToken: userTokens.refreshToken,
-          user: rest
+          user: rest,
         },
       });
     })(req, res, next);
@@ -125,6 +126,45 @@ const resetPassword = catchAsync(
   }
 );
 
+// set password
+const setPassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const decodedToken = req.user as JwtPayload;
+    const { password } = req.body;
+
+    await AuthServices.setPassword(decodedToken.userId, password);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Password Changed Successfully",
+      data: null,
+    });
+  }
+);
+
+// change password
+const changePassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const newPassword = req.body.newPassword;
+    const oldPassword = req.body.oldPassword;
+    const decodedToken = req.user;
+
+    await AuthServices.resetPassword(
+      oldPassword,
+      newPassword,
+      decodedToken as JwtPayload
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Password Changed Successfully",
+      data: null,
+    });
+  }
+);
+
 // googleCallBackController
 const googleCallBackController = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -151,5 +191,7 @@ export const AuthControllers = {
   getNewAccessToken,
   logout,
   resetPassword,
+  setPassword,
+  changePassword,
   googleCallBackController,
 };

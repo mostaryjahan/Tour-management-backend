@@ -10,25 +10,29 @@ const router = Router();
 router.post("/login", AuthControllers.credentialsLogin);
 router.post("/refresh-token", AuthControllers.getNewAccessToken);
 router.post("/logout", AuthControllers.logout);
+
+
 router.post(
-  "/forgot-password",
-  // checkAuth(...Object.values(Role)),
-  AuthControllers.forgotPassword
-);
-router.post(
-  "/reset-password",
+  "/change-password",
   checkAuth(...Object.values(Role)),
-  AuthControllers.resetPassword
+  AuthControllers.changePassword
 );
 router.post(
   "/set-password",
   checkAuth(...Object.values(Role)),
   AuthControllers.setPassword
 );
+
 router.post(
-  "/change-password",
+  "/forgot-password",
+  // checkAuth(...Object.values(Role)),
+  AuthControllers.forgotPassword
+);
+
+router.post(
+  "/reset-password",
   checkAuth(...Object.values(Role)),
-  AuthControllers.changePassword
+  AuthControllers.resetPassword
 );
 
 //  /booking -> /login -> success ful google login -> /booking frontend

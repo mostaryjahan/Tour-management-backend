@@ -68,7 +68,7 @@ const getInvoiceDownloadUrl = catchAsync(
 );
 
 const validatePayment = catchAsync(async (req: Request, res: Response) => {
-  console.log("sslcommerz url body", req.body);
+  console.log("sslcommerz IPN url body", req.body);
   await SSLService.validatePayment(req.body);
   sendResponse(res, {
     statusCode: 200,

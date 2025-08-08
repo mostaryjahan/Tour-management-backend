@@ -6,12 +6,10 @@ import { DivisionService } from "./division.service";
 import { IDivision } from "./division.interface";
 
 const createDivision = catchAsync(async (req: Request, res: Response) => {
-
   const payload: IDivision = {
     ...req.body,
-   thumbnail: req.file?.path,
+    thumbnail: req.file?.path,
   };
-
 
   const result = await DivisionService.createDivision(payload);
 
@@ -24,7 +22,10 @@ const createDivision = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllDivisions = catchAsync(async (req: Request, res: Response) => {
-  const result = await DivisionService.getAllDivisions();
+  const query = req.query;
+  const result = await DivisionService.getAllDivisions(
+    query as Record<string, string>
+  );
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -46,10 +47,10 @@ const getSingleDivision = catchAsync(async (req: Request, res: Response) => {
 
 const updateDivision = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.id;
-  const payload: IDivision={
+  const payload: IDivision = {
     ...req.body,
-    thumbnail: req.file?.path
-  }
+    thumbnail: req.file?.path,
+  };
 
   const result = await DivisionService.updateDivision(id, payload);
   sendResponse(res, {

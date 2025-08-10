@@ -96,31 +96,30 @@ passport.use(
         const email = profile.emails?.[0].value;
 
         if (!email) {
-          return done(null, false, { mesaage: "No email found" });
+          return done(null, false, { message: "No email found" });
         }
 
         let isUserExist = await User.findOne({ email });
-        if (isUserExist && !isUserExist.isVerified) {
-          // throw new AppError(httpStatus.BAD_REQUEST, "User is not verified")
-          // done("User is not verified")
-          return done(null, false, { message: "User is not verified" });
-        }
 
-        if (
-          isUserExist &&
-          (isUserExist.isActive === IsActive.BLOCKED ||
-            isUserExist.isActive === IsActive.INACTIVE)
-        ) {
-          // throw new AppError(httpStatus.BAD_REQUEST, `User is ${isUserExist.isActive}`)
-          done(`User is ${isUserExist.isActive}`);
-        }
+        if (isUserExist) {
+          // Auto-verify if logging in with Google
+          if (!isUserExist.isVerified) {
+            isUserExist.isVerified = true;
+            await isUserExist.save();
+          }
 
-        if (isUserExist && isUserExist.isDeleted) {
-          return done(null, false, { message: "User is deleted" });
-          // done("User is deleted")
-        }
+          if (
+            isUserExist.isActive === IsActive.BLOCKED ||
+            isUserExist.isActive === IsActive.INACTIVE
+          ) {
+            return done(`User is ${isUserExist.isActive}`);
+          }
 
-        if (!isUserExist) {
+          if (isUserExist.isDeleted) {
+            return done(null, false, { message: "User is deleted" });
+          }
+        } else {
+          // Create new Google-authenticated user
           isUserExist = await User.create({
             email,
             name: profile.displayName,
@@ -144,6 +143,7 @@ passport.use(
     }
   )
 );
+
 
 // frontend localhost:5173/login?redirect=/booking -> localhost:5000/api/v1/auth/google?redirect=/booking -> passport -> Google OAuth Consent -> gmail login -> successful -> callback url localhost:5000/api/v1/auth/google/callback -> db store -> token
 

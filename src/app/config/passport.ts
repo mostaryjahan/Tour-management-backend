@@ -11,7 +11,6 @@ import { IsActive, Role } from "../modules/user/user.interface";
 import { User } from "../modules/user/user.model";
 import { envVars } from "./env";
 
-
 passport.use(
   new LocalStrategy(
     {
@@ -32,7 +31,7 @@ passport.use(
 
         if (!isUserExist.isVerified) {
           // throw new AppError(httpStatus.BAD_REQUEST, "User is not verified")
-         return done("User is not verified");
+          return done("User is not verified");
         }
 
         if (
@@ -40,11 +39,11 @@ passport.use(
           isUserExist.isActive === IsActive.INACTIVE
         ) {
           // throw new AppError(httpStatus.BAD_REQUEST, `User is ${isUserExist.isActive}`)
-         return done(`User is ${isUserExist.isActive}`);
+          return done(`User is ${isUserExist.isActive}`);
         }
         if (isUserExist.isDeleted) {
-        //   throw new AppError(httpStatus.BAD_REQUEST, "User is deleted");
-           return done("User is deleted")
+          // throw new AppError(httpStatus.BAD_REQUEST, "User is deleted")
+          return done("User is deleted");
         }
 
         const isGoogleAuthenticated = isUserExist.auths.some(
@@ -97,7 +96,7 @@ passport.use(
         const email = profile.emails?.[0].value;
 
         if (!email) {
-          return done(null, false, { message: "No email found" });
+          return done(null, false, { mesaage: "No email found" });
         }
 
         let isUserExist = await User.findOne({ email });

@@ -32,7 +32,7 @@ app.use((0, cors_1.default)({
 app.use("/api/v1", routes_1.router);
 app.get("/", (req, res) => {
     res.status(200).json({
-        message: "Welcome to Tour Management",
+        message: "Welcome to Tour Management Systems",
     });
 });
 app.use(globalErrorHandler_1.globalErrorHandler);

@@ -42,7 +42,7 @@ passport_1.default.use(new passport_local_1.Strategy({
             return done(`User is ${isUserExist.isActive}`);
         }
         if (isUserExist.isDeleted) {
-            //   throw new AppError(httpStatus.BAD_REQUEST, "User is deleted");
+            // throw new AppError(httpStatus.BAD_REQUEST, "User is deleted")
             return done("User is deleted");
         }
         const isGoogleAuthenticated = isUserExist.auths.some((providerObjects) => providerObjects.provider == "google");
@@ -77,22 +77,22 @@ passport_1.default.use(new passport_google_oauth20_1.Strategy({
             return done(null, false, { message: "No email found" });
         }
         let isUserExist = yield user_model_1.User.findOne({ email });
-        if (isUserExist && !isUserExist.isVerified) {
-            // throw new AppError(httpStatus.BAD_REQUEST, "User is not verified")
-            // done("User is not verified")
-            return done(null, false, { message: "User is not verified" });
+        if (isUserExist) {
+            // Auto-verify if logging in with Google
+            if (!isUserExist.isVerified) {
+                isUserExist.isVerified = true;
+                yield isUserExist.save();
+            }
+            if (isUserExist.isActive === user_interface_1.IsActive.BLOCKED ||
+                isUserExist.isActive === user_interface_1.IsActive.INACTIVE) {
+                return done(`User is ${isUserExist.isActive}`);
+            }
+            if (isUserExist.isDeleted) {
+                return done(null, false, { message: "User is deleted" });
+            }
         }
-        if (isUserExist &&
-            (isUserExist.isActive === user_interface_1.IsActive.BLOCKED ||
-                isUserExist.isActive === user_interface_1.IsActive.INACTIVE)) {
-            // throw new AppError(httpStatus.BAD_REQUEST, `User is ${isUserExist.isActive}`)
-            done(`User is ${isUserExist.isActive}`);
-        }
-        if (isUserExist && isUserExist.isDeleted) {
-            return done(null, false, { message: "User is deleted" });
-            // done("User is deleted")
-        }
-        if (!isUserExist) {
+        else {
+            // Create new Google-authenticated user
             isUserExist = yield user_model_1.User.create({
                 email,
                 name: profile.displayName,

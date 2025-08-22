@@ -33,6 +33,17 @@ const getAllTours = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const getSingleTour = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await TourService.getSingleTour(id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Tour retrieved successfully",
+    data: result,
+  });
+});
+
 const updateTour = catchAsync(async (req: Request, res: Response) => {
 
      const payload : ITour ={
@@ -113,6 +124,7 @@ export const TourController = {
     deleteTourType,
     updateTourType,
     getAllTours,
+    getSingleTour,
     updateTour,
     deleteTour,
 };

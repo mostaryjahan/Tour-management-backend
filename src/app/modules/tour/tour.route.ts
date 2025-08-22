@@ -46,6 +46,11 @@ router.post(
   TourController.createTour
 );
 
+router.get(
+  "/:id",
+  TourController.getSingleTour
+);
+
 router.patch(
   "/:id",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),

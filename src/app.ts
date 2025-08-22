@@ -13,17 +13,13 @@ const app = express();
 
 app.use(cookieParser());
 app.use(express.json());
-const hour = 3600000;
+
 
 app.use(
   expressSession({
     secret: envVars.EXPRESS_SESSION_SECRET,
     resave: false,
-    cookie: {
-      expires: new Date(Date.now() + hour),
-      secure: app.get("env") === "production",
-      sameSite: "lax",
-    },
+    
     saveUninitialized: false,
   })
 );
